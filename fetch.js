@@ -11,27 +11,27 @@ function fetchAllYears(account) {
     function fetchNext() {
         updateProgress(`Ściąganie danych za rok ${year}!!!`);
         return fetchYear(account, year)
-        .then(r => r.ok ? {
-            ok: r.ok,
-            person: r.data.Osoba,
-            title: r.data.Opis,
-            minYear: r.data.McNajstarszegoDok ? moment(r.data.McNajstarszegoDok).year() : year,
-            docs: getDocs(r.data.Finanse || []),
-        } : {
-            ok: false,
-            minYear: year,
-        })
-        .then(fetchAllDocs)
-        .then(r => {
-            if (r.ok) {
-                data.person = r.person;
-                data.title = r.title;
-                data.docs = data.docs.concat(r.docs);
-                --year;
-                return earliest <= year ? fetchNext() : data;
-            }
-            return data;
-        });
+            .then(r => r.ok ? {
+                ok: r.ok,
+                person: r.data.Osoba,
+                title: r.data.Opis,
+                minYear: r.data.McNajstarszegoDok ? moment(r.data.McNajstarszegoDok).year() : year,
+                docs: getDocs(r.data.Finanse || []),
+            } : {
+                ok: false,
+                minYear: year,
+            })
+            .then(fetchAllDocs)
+            .then(r => {
+                if (r.ok) {
+                    data.person = r.person;
+                    data.title = r.title;
+                    data.docs = data.docs.concat(r.docs);
+                    --year;
+                    return earliest <= year ? fetchNext() : data;
+                }
+                return data;
+            });
     }
     return fetchNext();
 }
@@ -86,16 +86,16 @@ let doFetchInProgress = false;
 
 function updateProgress(text) {
     let button = document.getElementById('invoice-download-button');
-    if(button) button.innerText = text || 'Ściągnij wszystkie dokumenty!!!';
+    if (button) button.innerText = text || 'Ściągnij wszystkie dokumenty!!!';
 }
 
 function writeAll(data) {
-    let blob = new Blob([JSON.stringify(data, null, 4)], {type: 'application/json'});
+    let blob = new Blob([JSON.stringify(data, null, 4)], { type: 'application/json' });
     let url = window.URL.createObjectURL(blob);
     let docs = getDocUrls(data);
     let current = 0, all = docs.length + 1;
     updateProgress(`Ściąganie dokumentów ${current}/${all}...`);
-    let port = chrome.runtime.connect({name: data.account});
+    let port = chrome.runtime.connect({ name: data.account });
     port.onMessage.addListener(msg => {
         console.log('Got fileDownloaded');
         ++current;
@@ -106,7 +106,7 @@ function writeAll(data) {
         updateProgress(`Ściąganie zakończone!!!`);
         doFetchInProgress = false;
     });
-    port.postMessage({msg: 'download', account: data.account, url, docs});
+    port.postMessage({ msg: 'download', account: data.account, url, docs });
 }
 
 function log(o) {
@@ -116,7 +116,7 @@ function log(o) {
 
 function fetchData(url) {
     let account = getAccount(url);
-    if(!account) {
+    if (!account) {
         alert('Nie jesteś na główniej stronie konta');
         return;
     }
@@ -124,23 +124,40 @@ function fetchData(url) {
 }
 
 function doFetch() {
-    if(doFetchInProgress) return;
+    if (doFetchInProgress) return;
     doFetchInProgress = true;
     fetchData(getUrl()).then(log).then(writeAll);
 }
 
-function addButton() {
+function addButton(delay) {
+    console.log(`adding button ${delay}`)
+    if (!getAccount(getUrl()) || delay > 100) return;
     let header = document.getElementsByClassName('header-title');
-    if(getAccount(getUrl()) && header.length > 0) {
-        let button = document.createElement('button');
-        button.id = 'invoice-download-button';
-        button.onclick = doFetch;
-        header[0].appendChild(button);
-        updateProgress();
-    }
+    if (!header || header.length < 1) setTimeout(() => addButton(delay + 1), 200);
+
+    let button = document.createElement('button');
+    button.id = 'invoice-download-button';
+    button.onclick = doFetch;
+    header[0].appendChild(button);
+    updateProgress();
 }
 
-chrome.runtime.onMessage.addListener(msg => {
-});
+function patchLocationChange() {
+    history.pushSate = (f => function pushSate() {
+        let ret = f.apply(this, arguments);
+        window.dispatchEvent(new Event('locationchange'));
+        return ret;
+    })(history.pushState);
+    history.replaceState = (f => function replaceState() {
+        let ret = f.apply(this, arguments);
+        window.dispatchEvent(new Event('locationchange'));
+        return ret;
+    })(history.replaceState);
+    window.addEventListener('popstate', () => {
+        window.dispatchEvent(new Event('locationchange'));
+    });
+}
 
-addButton();
+patchLocationChange();
+window.addEventListener('locationchange', () => addButton(0));
+addButton(0);

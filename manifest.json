@@ -8,17 +8,20 @@
   "content_scripts": [
     {
       "matches": ["*://*.strefaklienta24.pl/atrium21/content/InetObsKontr/*"],
+      "run_at": "document_start",
       "js": ["moment.min.js", "fetch.js"]
     }
   ],
   "action": {
     "default_title": "Umożliwia ściągnięcie wszystkich dokumentów",
     "default_icon": {
-      "32": "tumieszkamy-logo.png"
+      "32": "tumieszkamy-32.png",
+      "128": "tumieszkamy-128.png"
     }
   },
   "icons": {
-    "32": "tumieszkamy-logo.png"
+    "32": "tumieszkamy-32.png",
+    "128": "tumieszkamy-128.png"
   },
   "permissions": [
     "activeTab",
