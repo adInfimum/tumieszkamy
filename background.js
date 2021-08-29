@@ -6,13 +6,6 @@ function updateProgress(port) {
     }
 }
 
-function downloadFull(url, account, port) {
-    chrome.downloads.download({
-        url,
-        filename: `${account}-full.json`,
-    }, updateProgress(port));
-}
-
 function downloadDocs(docs, port) {
     for (let i in docs) {
         chrome.downloads.download(docs[i], updateProgress(port));
@@ -20,7 +13,6 @@ function downloadDocs(docs, port) {
 }
 
 function downloadAll(msg, port) {
-    downloadFull(msg.url, msg.account, port);
     downloadDocs(msg.docs, port);
 }
 
