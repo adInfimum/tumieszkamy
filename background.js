@@ -14,7 +14,7 @@ function downloadFull(url, account, port) {
 }
 
 function downloadDocs(docs, port) {
-    for(let i in docs) {
+    for (let i in docs) {
         chrome.downloads.download(docs[i], updateProgress(port));
     }
 }
@@ -25,11 +25,18 @@ function downloadAll(msg, port) {
 }
 
 function hasMoreFiles(map, port) {
-    for(let p of map.values()) {
-        if(p.name === port.name) return true;
+    for (let p of map.values()) {
+        if (p.name === port.name) return true;
     }
     return false;
 }
+
+chrome.action.onClicked.addListener((tab) => {
+    chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['invoke.js']
+    });
+});
 
 chrome.runtime.onConnect.addListener((port) => {
     let tabId = port.sender.tab.id;
@@ -37,10 +44,10 @@ chrome.runtime.onConnect.addListener((port) => {
 });
 
 chrome.downloads.onChanged.addListener(delta => {
-    if(monitoredFileIds.has(delta.id) && delta.endTime) {
+    if (monitoredFileIds.has(delta.id) && delta.endTime) {
         let port = monitoredFileIds.get(delta.id);
         monitoredFileIds.delete(delta.id);
-        port.postMessage({msg: 'fileDownloaded', fileId: delta.id});
-        if(!hasMoreFiles(monitoredFileIds, port)) port.disconnect();
+        port.postMessage({ msg: 'fileDownloaded', fileId: delta.id });
+        if (!hasMoreFiles(monitoredFileIds, port)) port.disconnect();
     }
 });

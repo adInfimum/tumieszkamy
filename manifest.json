@@ -8,7 +8,6 @@
   "content_scripts": [
     {
       "matches": ["*://*.strefaklienta24.pl/atrium21/content/InetObsKontr/*"],
-      "run_at": "document_start",
       "js": ["moment.min.js", "fetch.js"]
     }
   ],

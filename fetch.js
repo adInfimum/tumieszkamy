@@ -129,12 +129,10 @@ function doFetch() {
     fetchData(getUrl()).then(log).then(writeAll);
 }
 
-function addButton(delay) {
-    console.log(`adding button ${delay}`)
-    if (!getAccount(getUrl()) || delay > 100) return;
+function addButton() {
+    if (!getAccount(getUrl())) return;
     let header = document.getElementsByClassName('header-title');
-    if (!header || header.length < 1) setTimeout(() => addButton(delay + 1), 200);
-
+    if (!header || header.length < 1) return;
     let button = document.createElement('button');
     button.id = 'invoice-download-button';
     button.onclick = doFetch;
@@ -142,22 +140,4 @@ function addButton(delay) {
     updateProgress();
 }
 
-function patchLocationChange() {
-    history.pushSate = (f => function pushSate() {
-        let ret = f.apply(this, arguments);
-        window.dispatchEvent(new Event('locationchange'));
-        return ret;
-    })(history.pushState);
-    history.replaceState = (f => function replaceState() {
-        let ret = f.apply(this, arguments);
-        window.dispatchEvent(new Event('locationchange'));
-        return ret;
-    })(history.replaceState);
-    window.addEventListener('popstate', () => {
-        window.dispatchEvent(new Event('locationchange'));
-    });
-}
-
-patchLocationChange();
-window.addEventListener('locationchange', () => addButton(0));
-addButton(0);
+addButton();
