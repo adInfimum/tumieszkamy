@@ -83,6 +83,8 @@ function getDocUrls(data) {
 }
 
 let doFetchInProgress = false;
+let doFetchInProgressCurrent = false;
+let doFetchInProgressAll = false;
 
 function updateProgress(text) {
     let button = document.getElementById('invoice-download-button');
@@ -93,19 +95,9 @@ function writeAll(data) {
     let blob = new Blob([JSON.stringify(data, null, 4)], {type: 'application/json'});
     let url = window.URL.createObjectURL(blob);
     let docs = getDocUrls(data);
-    let progress = 0, all = docs.length + 1;
-    chrome.runtime.onMessage.addListener(function fileDownloaded(msg) {
-        if(msg.msg != 'fileDownloaded') return;
-        ++progress;
-        updateProgress(`Ściąganie dokumentów ${progress}/${all}...`);
-        if(progress >= all) {
-            window.URL.revokeObjectURL(url);
-            updateProgress(`Ściąganie zakończone!!!`);
-            chrome.runtime.onMessage.removeListener(fileDownloaded);
-            doFetchInProgress = false;
-        }
-    });
-    updateProgress(`Ściąganie dokumentów ${progress}/${all}...`);
+    doFetchInProgressCurrent = 0;
+    doFetchInProgressAll = docs.length + 1;
+    updateProgress(`Ściąganie dokumentów ${doFetchInProgressCurrent}/${doFetchInProgressAll}...`);
     chrome.runtime.sendMessage({msg: 'download', account: data.account, url, docs});
 }
 
@@ -139,5 +131,17 @@ function addButton() {
         updateProgress();
     }
 }
+
+chrome.runtime.onMessage.addListener(msg => {
+    if(msg.msg != 'fileDownloaded') return;
+    console.log('Got fileDownloaded');
+    ++doFetchInProgressCurrent;
+    updateProgress(`Ściąganie dokumentów ${doFetchInProgressCurrent}/${doFetchInProgressAll}...`);
+    if(doFetchInProgressCurrent >= doFetchInProgressAll) {
+        //window.URL.revokeObjectURL(url);
+        updateProgress(`Ściąganie zakończone!!!`);
+        doFetchInProgress = false;
+    }
+});
 
 addButton();
