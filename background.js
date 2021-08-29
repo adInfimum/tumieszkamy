@@ -1,48 +1,46 @@
 let monitoredFileIds = new Map();
 
-function updateProgress(tabId) {
+function updateProgress(port) {
     return fileId => {
-        monitoredFileIds.set(fileId, tabId);
+        monitoredFileIds.set(fileId, port);
     }
 }
 
-function downloadFull(url, account, tabId) {
+function downloadFull(url, account, port) {
     chrome.downloads.download({
         url,
         filename: `${account}-full.json`,
-    }, updateProgress(tabId));
+    }, updateProgress(port));
 }
 
-function downloadDocs(docs, tabId) {
+function downloadDocs(docs, port) {
     for(let i in docs) {
-        chrome.downloads.download(docs[i], updateProgress(tabId));
+        chrome.downloads.download(docs[i], updateProgress(port));
     }
 }
 
-function downloadAll(msg, tabId) {
-    downloadFull(msg.url, msg.account, tabId);
-    downloadDocs(msg.docs, tabId);
+function downloadAll(msg, port) {
+    downloadFull(msg.url, msg.account, port);
+    downloadDocs(msg.docs, port);
 }
 
-chrome.action.onClicked.addListener((tab) => {
-    chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ['invoke.js']
-    });
-});
-
-chrome.runtime.onMessage.addListener((msg, sender) => {
-    switch(msg.msg) {
-        case 'download':
-            downloadAll(msg, sender.tab.id);
-            break;
+function hasMoreFiles(map, port) {
+    for(let p of map.values()) {
+        if(p.name === port.name) return true;
     }
+    return false;
+}
+
+chrome.runtime.onConnect.addListener((port) => {
+    let tabId = port.sender.tab.id;
+    port.onMessage.addListener((msg, msgPort) => downloadAll(msg, msgPort))
 });
 
 chrome.downloads.onChanged.addListener(delta => {
     if(monitoredFileIds.has(delta.id) && delta.endTime) {
-        console.log('Sending fileDownloaded');
-        chrome.tabs.sendMessage(monitoredFileIds.get(delta.id), {msg: 'fileDownloaded', fileId: delta.id});
-        //monitoredFileIds.delete(delta.id);
+        let port = monitoredFileIds.get(delta.id);
+        monitoredFileIds.delete(delta.id);
+        port.postMessage({msg: 'fileDownloaded', fileId: delta.id});
+        if(!hasMoreFiles(monitoredFileIds, port)) port.disconnect();
     }
 });
