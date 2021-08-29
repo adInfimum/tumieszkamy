@@ -1,0 +1,24 @@
+{
+  "name": "TuMieszkamy - Faktury",
+  "description": "Ściąga faktury z TuMieszkamy (Atrium21)",
+  "version": "1.0",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.strefaklienta24.pl/atrium21/content/InetObsKontr/*"],
+      "js": ["moment.min.js", "fetch.js"]
+    }
+  ],
+  "action": {
+    "default_title": "Ściągnij faktury"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "downloads",
+    "filesystem"
+  ],
+  "manifest_version": 3
+}
