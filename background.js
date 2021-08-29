@@ -42,8 +42,10 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
 });
 
 chrome.downloads.onChanged.addListener(delta => {
+    console.log(delta);
     if(monitoredFileIds.has(delta.id) && delta.endTime) {
         chrome.tabs.sendMessage(monitoredFileIds.get(delta.id), {msg: 'fileDownloaded', fileId: delta.id});
         monitoredFileIds.delete(delta.id);
+        console.log(`Monitoring ${monitoredFileIds.size} files`);
     }
 });
