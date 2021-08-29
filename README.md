@@ -6,7 +6,7 @@ Rozszerzenie działa tylko na przeglądarce Chrome. Możesz ją zainstalować [t
 
 Rozszerzenie czeka na opublikowanie w sklepie Google Chrome. Do tego czasu można z niego korzystać instalując je samemu lokalnie. Poniższe kroki należy wykonać jednorazowo przy pierwszej instalacji rozszerzenia (lub po jego aktualizacji).
 
-1. Ściągnij archiwum z rozszerzeniem
+1. Ściągnij [archiwum z rozszerzeniem](https://github.com/adInfimum/tumieszkamy/releases/latest/download/tumieszkamy.zip)
 1. Rozpakuj do nowego katalogu
 1. Otwórz ustawienia rozszerzeń w Chrome przechodzą na stronę chrome://extensions lub przez menu (try kropki w górnym prawym rogu) -> Ustawienia -> Rozszerzenia (w menu po lewej stronie)
 1. Włącz opcję "tryb developera" w górym prawym rogu okna
