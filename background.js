@@ -3,7 +3,6 @@ let monitoredFileIds = new Map();
 function updateProgress(tabId) {
     return fileId => {
         monitoredFileIds.set(fileId, tabId);
-        console.log(`Monitoring ${monitoredFileIds.size} files`);
     }
 }
 
@@ -33,7 +32,6 @@ chrome.action.onClicked.addListener((tab) => {
 });
 
 chrome.runtime.onMessage.addListener((msg, sender) => {
-    //console.log(msg);
     switch(msg.msg) {
         case 'download':
             downloadAll(msg, sender.tab.id);
@@ -42,10 +40,8 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
 });
 
 chrome.downloads.onChanged.addListener(delta => {
-    console.log(delta);
     if(monitoredFileIds.has(delta.id) && delta.endTime) {
         chrome.tabs.sendMessage(monitoredFileIds.get(delta.id), {msg: 'fileDownloaded', fileId: delta.id});
         monitoredFileIds.delete(delta.id);
-        console.log(`Monitoring ${monitoredFileIds.size} files`);
     }
 });
