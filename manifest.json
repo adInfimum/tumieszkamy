@@ -1,6 +1,6 @@
 {
-  "name": "TuMieszkamy/Atrium21 - Faktury",
-  "description": "Umożliwia ściągnięcie wszystkich dokumentów z TuMieszkamy/Atrium21",
+  "name": "Pobieranie faktur z TuMieszkamy/Atrium21",
+  "description": "Umożliwia pobranie wszystkich dokumentów z TuMieszkamy/Atrium21",
   "version": "1.0",
   "background": {
     "service_worker": "background.js"
@@ -12,7 +12,7 @@
     }
   ],
   "action": {
-    "default_title": "Umożliwia ściągnięcie wszystkich dokumentów",
+    "default_title": "Umożliwia pobranie wszystkich dokumentów",
     "default_icon": {
       "32": "tumieszkamy-32.png",
       "128": "tumieszkamy-128.png"
